@@ -3,59 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dolphin0X ai chat bot</title>
+    <title>Dolphin0x chat bot</title>
     <style>
+        
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #0f111a;
-            color: white;
+            background-color: #000000;
+            color: #00f2fe;
+            font-family: 'Courier New', Courier, monospace;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
+            overflow: hidden;
         }
 
-        .welcome-container {
+        
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .container {
             text-align: center;
-            max-width: 600px;
-            padding: 20px;
+            z-index: 10;
+        }
+
+        
+        .dolphin-gif {
+            width: 150px;
+            height: 150px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 15px #00f2fe);
         }
 
         h1 {
-            font-size: 3rem;
-            background: linear-gradient(45deg, #00cec9, #6c5ce7);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 10px #00f2fe, 0 0 20px #00f2fe;
         }
 
         p {
-            color: #b2bec3;
-            font-size: 1.2rem;
+            color: #888;
+            font-size: 1rem;
+            margin-bottom: 40px;
+            text-transform: uppercase;
         }
 
-        .status-badge {
-            display: inline-block;
-            background-color: #1e272e;
-            color: #00d2d3;
-            padding: 8px 16px;
-            border-radius: 20px;
+        
+        .mega-chat-btn {
+            background-color: transparent;
+            color: #00f2fe;
+            border: 3px solid #00f2fe;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 20px;
-            border: 1px solid #00d2d3;
+            text-transform: uppercase;
+            border-radius: 0px; 
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .mega-chat-btn:hover {
+            background-color: #00f2fe;
+            color: #000000;
+            box-shadow: 0 0 30px #00f2fe, 0 0 50px #00f2fe;
+            transform: scale(1.05);
         }
     </style>
 </head>
 <body>
 
-    <div class="welcome-container">
-        <h1>dolphins0X ai bot</h1>
-        <p>ask me anything!</p>
+    <div class="container">
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHg3Mnd4cHZhcDN3cmFwZHlsMG10OHl0bTBxdXN4YnY2amN1M3N3MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/u00507MxtYmSk/giphy.gif" alt="Dolphin" class="dolphin-gif">
         
-        <div class="status-badge">● Dolphin0x bot is online</div>
+        <h1>Dolphin0x Bot</h1>
+        <p>[ System Online ]</p>
+        
+        <button class="mega-chat-btn" onclick="openChat()">Open Dolphin0x chat bot</button>
     </div>
 
     <script>
@@ -63,10 +99,18 @@
         chatbotId: "QXykIJFGGmZlPDp0fZL9I",
         domain: "www.chatbase.co"
       }
+      
+     
+      function openChat() {
+          const iframe = document.getElementById("chatbase-message-bubble") || document.querySelector("[id^='chatbase']");
+          if(iframe) {
+              iframe.click(); 
+          } else {
+              alert("De chatbot laadt nog, momentje!");
+          }
+        }
     </script>
-    <script src="https://www.chatbase.co/embed.min.js" chatbotId="HIER_KOMT_JOUW_ID" defer></script>
-  <script>
-(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="QXykIJFGGmZlPDp0fZL9I";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
-</script> 
+    <script src="https://www.chatbase.co/embed.min.js" chatbotId="QXykIJFGGmZlPDp0fZL9I" defer></script>
+
 </body>
 </html>
