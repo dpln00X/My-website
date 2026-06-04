@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #13131a;
+            background-color: #0f111a;
             color: white;
             margin: 0;
             display: flex;
@@ -25,7 +25,7 @@
 
         h1 {
             font-size: 3rem;
-            background: linear-gradient(45deg, #ff7675, #6c5ce7);
+            background: linear-gradient(45deg, #00cec9, #6c5ce7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
@@ -36,37 +36,37 @@
             font-size: 1.2rem;
         }
 
-        .info-card {
-            background-color: #1e1e2f;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid #341f97;
-            margin-top: 30px;
+        .status-badge {
+            display: inline-block;
+            background-color: #1e272e;
+            color: #00d2d3;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            border: 1px solid #00d2d3;
         }
     </style>
 </head>
 <body>
 
     <div class="welcome-container">
-        <h1>Welkom op mijn AI Pagina</h1>
-        <p>Klik rechtsonder op het icoontje om te chatten met een echte AI die al je vragen beantwoordt!</p>
+        <h1>Mijn AI Platform</h1>
+        <p>Stel al je vragen aan de live AI-assistent rechtsonder in je scherm!</p>
         
-        <div class="info-card">
-            <h3>Wat kan deze bot?</h3>
-            <p>In tegenstelling tot de simpele bot van eerst, kan deze chatbot rekenen, verhalen schrijven, code uitleggen en ingewikkelde vragen beantwoorden.</p>
-        </div>
+        <div class="status-badge">● Chatbase AI is Actief</div>
     </div>
 
-    <script type="text/javascript">
-    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-    (function(){
-    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-    s1.async=true;
-    s1.src='https://embed.tawk.to/demo-chat-link-vervang-dit/default';
-    s1.charset='UTF-8';
-    s1.setAttribute('crossorigin','*');
-    s0.parentNode.insertBefore(s1,s0);
-    })();
+    <script>
+      window.embeddedChatbotConfig = {
+        chatbotId: "HIER_KOMT_JOUW_ID",
+        domain: "www.chatbase.co"
+      }
     </script>
-    </body>
+    <script src="https://www.chatbase.co/embed.min.js" chatbotId="HIER_KOMT_JOUW_ID" defer></script>
+  <script>
+(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="QXykIJFGGmZlPDp0fZL9I";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
+</script> 
+</body>
 </html>
