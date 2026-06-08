@@ -96,8 +96,7 @@
         .me .msg-bubble { background: var(--accent); color: #ffffff; border-bottom-right-radius: 2px; }
         .them .msg-bubble { background: var(--bg-panel); color: var(--text-main); border-bottom-left-radius: 2px; border: 1px solid var(--border-color); }
         
-        /* Afbeelding Stijlen */
-        .msg-image { max-width: 100%; max-height: 250px; border-radius: 8px; display: block; cursor: pointer; transition: opacity 0.15s; }
+        .msg-image { max-width: 100%; max-height: 250px; border-radius: 8px; display: block; cursor: pointer; transition: opacity 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .msg-image:hover { opacity: 0.9; }
 
         .delete-btn {
@@ -112,7 +111,6 @@
 
         .chat-input-bar { padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; background: var(--bg-panel); border-bottom-right-radius: 12px; align-items: center; }
         
-        /* Media Upload Knop */
         .media-btn {
             background: var(--bg-main); color: var(--text-muted); border: 1px solid var(--border-color);
             width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
@@ -439,7 +437,6 @@
                         `;
                     }
 
-                    // Content switch: tekst óf afbeelding
                     let contentHtml = `<div class="msg-bubble">${escapeHTML(msg.text)}</div>`;
                     if (msg.type === "image") {
                         contentHtml = `<img src="${msg.imageUrl}" class="msg-image" onclick="window.open('${msg.imageUrl}', '_blank')">`;
@@ -463,11 +460,10 @@
             if (!confirm(t.confirmDelete)) return;
 
             try {
-                // Als er een gekoppeld bestand in Storage staat, deze eerst wissen
                 if (encodedStoragePath) {
                     const storagePath = decodeURIComponent(encodedStoragePath);
                     const fileRef = ref(storage, storagePath);
-                    await deleteObject(fileRef).catch(e => console.log("Storage file cleanup skipped or failed:", e));
+                    await deleteObject(fileRef).catch(e => console.log("Storage cleanup failed:", e));
                 }
 
                 if (activeChatUserId === "global") {
@@ -519,11 +515,12 @@
             const fileRef = ref(storage, storagePath);
 
             try {
-                
+                console.log("Starting upload to path:", storagePath);
                 const snapshot = await uploadBytes(fileRef, file);
+                console.log("Upload success, fetching URL...");
                 const imageUrl = await getDownloadURL(snapshot.ref);
+                console.log("URL obtained:", imageUrl);
 
-               
                 if (activeChatUserId === "global") {
                     await addDoc(collection(db, "global_messages"), {
                         senderId: currentUser.uid,
@@ -543,11 +540,13 @@
                         timestamp: new Date()
                     });
                 }
+                console.log("Firestore reference saved successfully!");
             } catch (err) {
-                alert("Upload failed: " + err.message);
+                console.error("Full upload error:", err);
+                alert("Upload failed! Check your Firebase Storage rules. Error: " + err.message);
             }
 
-            inputElement.value = ""; 
+            inputElement.value = "";
         };
 
         function escapeHTML(str) {
