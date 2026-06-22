@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dolphin0x | Master OS</title>
+    <script src="https://js.puter.com/v2/"></script>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { margin: 0; background-color: #0b1120; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        
+        .app-container { width: 100%; max-width: 800px; height: 95vh; background: #1e293b; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .screen { display: none; flex-direction: column; height: 100%; }
+        .screen.active { display: flex; }
+
+        /* Startscherm */
+        .start-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
+        .btn-start { background: #38bdf8; color: #0b1120; padding: 20px 40px; font-size: 1.2rem; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); }
+
+        /* Hoofdscherm */
+        .header { padding: 15px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .header h2 { margin: 0; color: #38bdf8; }
+        
+        .esp-input { background: #1e293b; border: 1px solid #475569; border-radius: 8px; padding: 8px; color: #10b981; font-weight: bold; outline: none; width: 140px; text-align: center; }
+        
+        .chat-box { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .msg { padding: 15px 20px; border-radius: 15px; max-width: 85%; line-height: 1.5; }
+        .msg.user { background: #38bdf8; color: #000; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+        .msg.ai { background: #334155; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg.error { background: #7f1d1d; color: #fca5a5; align-self: center; font-size: 0.9rem; border-radius: 10px; }
+        .msg.system { background: rgba(16, 185, 129, 0.2); color: #10b981; align-self: center; font-size: 0.9rem; border-radius: 10px; border: 1px solid #10b981; }
+
+        .input-bar { padding: 20px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #334155; }
+        .text-input { flex-grow: 1; background: #1e293b; border: 1px solid #475569; border-radius: 25px; padding: 0 20px; color: white; outline: none; font-size: 1rem; }
+        .btn { padding: 0 25px; height: 50px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-send { background: #38bdf8; color: #000; }
+        .btn-mic { width: 50px; padding: 0; border-radius: 50%; background: #10b981; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; }
+        .btn-mic.active { background: #ef4444; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div id="startScreen" class="screen active start-screen">
+            <h1 style="color: #38bdf8;">Dolphin0x</h1>
+            <p>Klik om de veilige omgeving te starten en rechten uit te delen.</p>
+            <button class="btn-start" onclick="startSysteem()">⚡ Systeem Opstarten</button>
+        </div>
+
+        <div id="mainScreen" class="screen">
+            <div class="header">
+                <h2>Dolphin0x</h2>
+                <input type="text" id="espIp" class="esp-input" placeholder="ESP32 IP...">
+                <label style="color: #94a3b8; font-size: 0.9rem;">
+                    <input type="checkbox" id="webToggle"> Live Web
+                </label>
+            </div>
+
+            <div id="chatBox" class="chat-box">
+                <div class="msg ai">Systeem online. Hoe kan ik je vandaag helpen? (Vul bovenin het IP-adres van je ESP32 in om hardware te besturen).</div>
+            </div>
+
+            <div class="input-bar">
+                <button id="micBtn" class="btn btn-mic" onclick="toggleMicrofoon()">🎙️</button>
+                <input type="text" id="userInput" class="text-input" placeholder="Typ of spreek een commando..." onkeypress="if(event.key === 'Enter') stuurBericht()">
+                <button class="btn btn-send" onclick="stuurBericht()">Stuur</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chatBox');
+        let geschiedenis = [
+            { role: "system", content: "Je bent Dolphin0x, een behulpzame AI. Antwoord vlot en persoonlijk. ALS de gebruiker een lamp/led aan wil zetten, antwoord dan leuk en zet EXACT de tekst '[LED_ON]' helemaal aan het einde. Als de lamp uit moet, gebruik '[LED_OFF]'." }
+        ];
+
+        // Spraaksynthese & Herkenning instellen
+        const synth = window.speechSynthesis;
+        const SpraakHerkenning = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let herkenning = SpraakHerkenning ? new SpraakHerkenning() : null;
+
+        if (herkenning) {
+            herkenning.lang = 'nl-NL';
+            herkenning.onstart = () => document.getElementById('micBtn').classList.add('active');
+            herkenning.onend = () => document.getElementById('micBtn').classList.remove('active');
+            herkenning.onresult = (e) => {
+                document.getElementById('userInput').value = e.results[0][0].transcript;
+                stuurBericht();
+            };
+        }
+
+        async function startSysteem() {
+            try {
+                // Initialiseer Puter en vraag direct toestemming (die kleine popup)
+                await puter.ai.chat("ping");
+                
+                // Haal onzichtbaar de stemmen alvast op
+                synth.getVoices(); 
+                
+                document.getElementById('startScreen').classList.remove('active');
+                document.getElementById('mainScreen').classList.add('active');
+            } catch (err) {
+                alert("Activatie mislukt. Sta de Puter pop-up toe op je iPad!");
+            }
+        }
+
+        function voegBerichtToe(rol, tekst, isSpeciaal = false) {
+            const div = document.createElement('div');
+            div.className = `msg ${rol}`;
+            div.innerText = tekst;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function stuurBericht() {
+            const input = document.getElementById('userInput');
+            const tekst = input.value.trim();
+            if (!tekst) return;
+
+            input.value = '';
+            voegBerichtToe('user', tekst);
+
+            let promptVoorAI = tekst;
+
+            // Simpele Web Scraper via DuckDuckGo als de toggle aan staat
+            if (document.getElementById('webToggle').checked && !tekst.toLowerCase().includes('led')) {
+                try {
+                    const proxy = `https://corsproxy.io/?https://html.duckduckgo.com/html/?q=${encodeURIComponent(tekst)}`;
+                    const res = await fetch(proxy);
+                    if (res.ok) {
+                        const html = await res.text();
+                        const doc = new DOMParser().parseFromString(html, 'text/html');
+                        const snippets = Array.from(doc.querySelectorAll('.result__snippet')).slice(0, 2).map(el => el.innerText);
+                        if (snippets.length) promptVoorAI = `[WEB INFO]: ${snippets.join(' | ')}\n\n[VRAAG]: ${tekst}`;
+                    }
+                } catch (e) {
+                    console.log("Web zoeken mislukt, we gaan door zonder web-data.");
+                }
+            }
+
+            geschiedenis.push({ role: "user", content: promptVoorAI });
+
+            try {
+                const antwoord = await puter.ai.chat(geschiedenis, { model: 'openai/gpt-4o-mini' });
+                let aiTekst = typeof antwoord === 'string' ? antwoord : (antwoord?.message?.content || "");
+
+                // ESP32 Hardware Check
+                let actie = null;
+                if (aiTekst.includes('[LED_ON]')) { actie = "on"; aiTekst = aiTekst.replace('[LED_ON]', ''); }
+                if (aiTekst.includes('[LED_OFF]')) { actie = "off"; aiTekst = aiTekst.replace('[LED_OFF]', ''); }
+
+                geschiedenis.push({ role: "assistant", content: aiTekst });
+                voegBerichtToe('ai', aiTekst);
+                praat(aiTekst);
+
+                if (actie) triggerESP32(actie);
+
+            } catch (error) {
+                voegBerichtToe('error', `Fout bij AI verbinding: ${error.message}`);
+            }
+        }
+
+        async function triggerESP32(status) {
+            const ip = document.getElementById('espIp').value.trim();
+            if (!ip) {
+                voegBerichtToe('error', "Geen IP ingevuld! Kon de ESP32 niet bereiken.");
+                return;
+            }
+            try {
+                // Het onzichtbare Wi-Fi signaal
+                await fetch(`http://${ip}/led/${status}`, { mode: 'no-cors' });
+                voegBerichtToe('system', `✅ Signaal gestuurd naar ${ip} (Status: ${status.toUpperCase()})`);
+            } catch (e) {
+                voegBerichtToe('error', "Kon de ESP32 niet bereiken. Zitten jullie op dezelfde Wi-Fi?");
+            }
+        }
+
+        function praat(tekst) {
+            synth.cancel();
+            let schoon = tekst.replace(/[*#_\[\]]/g, ''); 
+            // Anti-stotter: knip bij punten en uitroeptekens
+            let zinnen = schoon.match(/[^.!?]+[.!?]+/g) || [schoon];
+            
+            let stemmen = synth.getVoices();
+            let uniekeStem = stemmen.find(v => v.lang === 'nl-BE') || stemmen.find(v => v.lang === 'nl-NL' && !v.name.includes('Siri')) || stemmen.find(v => v.lang.includes('nl'));
+
+            zinnen.forEach(zin => {
+                let u = new SpeechSynthesisUtterance(zin.trim());
+                if (uniekeStem) u.voice = uniekeStem;
+                u.pitch = 0.85; // Iets donkerder
+                u.rate = 1.05;  // Iets sneller
+                synth.speak(u);
+            });
+        }
+
+        function toggleMicrofoon() {
+            if (!herkenning) { alert("Microfoon niet ondersteund op deze browser."); return; }
+            if (synth.speaking) synth.cancel();
+            herkenning.start();
+        }
+    </script>
+</body>
+</html>
