@@ -1,86 +1,152 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dolphin0x | Master OS</title>
+    <title>Dolphin0x | Advanced Chat OS</title>
+    <!-- De gratis sleutelloze AI-motor van Puter -->
     <script src="https://js.puter.com/v2/"></script>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { margin: 0; background-color: #0b1120; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        body { margin: 0; background-color: #0b1120; color: #f8fafc; display: flex; justify-content: center; align-items: center; height: 100vh; padding: 10px; }
         
-        .app-container { width: 100%; max-width: 800px; height: 95vh; background: #1e293b; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .app-container { width: 100%; max-width: 1100px; height: 95vh; background: #1e293b; border-radius: 20px; display: flex; overflow: hidden; border: 1px solid #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .screen { display: none; flex-direction: column; height: 100%; }
+        .screen { display: none; width: 100%; height: 100%; }
         .screen.active { display: flex; }
 
         /* Startscherm */
-        .start-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; }
-        .btn-start { background: #38bdf8; color: #0b1120; padding: 20px 40px; font-size: 1.2rem; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); }
+        .start-screen { justify-content: center; align-items: center; padding: 20px; text-align: center; flex-direction: column; width: 100%; }
+        .btn-start { background: linear-gradient(135deg, #38bdf8, #2563eb); color: white; padding: 20px 40px; font-size: 1.3rem; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4); transition: transform 0.2s; }
+        .btn-start:active { transform: scale(0.95); }
 
-        /* Hoofdscherm */
-        .header { padding: 15px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .header h2 { margin: 0; color: #38bdf8; }
+        /* SIDEBAR (Chats & Code Opslag) */
+        .sidebar { width: 280px; background: #0f172a; border-right: 1px solid #334155; display: flex; flex-direction: column; height: 100%; }
+        .sidebar-tabs { display: flex; border-bottom: 1px solid #334155; }
+        .tab-btn { flex: 1; padding: 15px; background: transparent; border: none; color: #94a3b8; font-weight: bold; cursor: pointer; text-align: center; font-size: 0.9rem; }
+        .tab-btn.active { color: #38bdf8; border-bottom: 2px solid #38bdf8; background: rgba(56, 189, 248, 0.05); }
         
-        .esp-input { background: #1e293b; border: 1px solid #475569; border-radius: 8px; padding: 8px; color: #10b981; font-weight: bold; outline: none; width: 140px; text-align: center; }
+        .tab-content { flex-grow: 1; overflow-y: auto; padding: 15px; display: none; }
+        .tab-content.active { display: block; }
+
+        .btn-new { width: 100%; background: #38bdf8; color: #0b1120; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 15px; font-size: 0.95rem; }
+        
+        /* Items in Sidebar */
+        .item-list { display: flex; flex-direction: column; gap: 8px; }
+        .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #1e293b; border-radius: 8px; cursor: pointer; border: 1px solid transparent; group; }
+        .list-item:hover, .list-item.active { border-color: #38bdf8; background: #24334d; }
+        .item-text { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; margin-right: 5px; }
+        .btn-del { background: transparent; border: none; color: #ef4444; cursor: pointer; font-size: 1rem; opacity: 0.7; }
+        .btn-del:hover { opacity: 1; }
+
+        /* HOOFDSCHERM CHAT */
+        .chat-area { flex-grow: 1; display: flex; flex-direction: column; background: #111827; height: 100%; }
+        .chat-header { padding: 15px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; align-items: center; justify-content: space-between; }
+        .chat-header h2 { margin: 0; color: #38bdf8; font-size: 1.2rem; }
         
         .chat-box { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg { padding: 15px 20px; border-radius: 15px; max-width: 85%; line-height: 1.5; }
+        .msg { padding: 14px 18px; border-radius: 15px; max-width: 85%; line-height: 1.5; font-size: 1rem; word-break: break-word; }
         .msg.user { background: #38bdf8; color: #000; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
-        .msg.ai { background: #334155; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
-        .msg.error { background: #7f1d1d; color: #fca5a5; align-self: center; font-size: 0.9rem; border-radius: 10px; }
-        .msg.system { background: rgba(16, 185, 129, 0.2); color: #10b981; align-self: center; font-size: 0.9rem; border-radius: 10px; border: 1px solid #10b981; }
+        .msg.ai { background: #1e293b; color: #fff; align-self: flex-start; border-bottom-left-radius: 4px; }
+        
+        /* Typ Indicator */
+        .typing-indicator { display: none; align-self: flex-start; background: #1e293b; padding: 12px 20px; border-radius: 15px; border-bottom-left-radius: 4px; }
+        .typing-dots { display: flex; gap: 5px; align-items: center; height: 20px; }
+        .dot { width: 8px; height: 8px; background: #38bdf8; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
 
-        .input-bar { padding: 20px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #334155; }
-        .text-input { flex-grow: 1; background: #1e293b; border: 1px solid #475569; border-radius: 25px; padding: 0 20px; color: white; outline: none; font-size: 1rem; }
-        .btn { padding: 0 25px; height: 50px; border-radius: 25px; border: none; font-weight: bold; cursor: pointer; }
-        .btn-send { background: #38bdf8; color: #000; }
-        .btn-mic { width: 50px; padding: 0; border-radius: 50%; background: #10b981; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; }
-        .btn-mic.active { background: #ef4444; }
+        /* Input Balk */
+        .input-bar { padding: 20px; background: #0f172a; display: flex; gap: 10px; border-top: 1px solid #334155; align-items: center; }
+        .text-input { flex-grow: 1; background: #1e293b; border: 1px solid #475569; border-radius: 25px; padding: 15px 20px; color: white; outline: none; font-size: 1rem; }
+        .text-input:focus { border-color: #38bdf8; }
+        .btn-icon { height: 50px; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; }
+        .btn-send { background: #38bdf8; color: #000; padding: 0 25px; }
+        .btn-mic { width: 50px; background: #10b981; color: white; padding: 0; }
+        .btn-mic.active { background: #ef4444; animation: pulse 1s infinite alternate; }
+        @keyframes pulse { 0% { transform: scale(1); } 100% { transform: scale(1.05); } }
+
+        /* Code Manager Formulier */
+        .code-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; background: #1e293b; padding: 10px; border-radius: 8px; }
+        .code-form input, .code-form textarea { width: 100%; background: #0f172a; border: 1px solid #475569; color: white; padding: 8px; border-radius: 5px; outline: none; }
+        .code-box { font-family: monospace; font-size: 0.8rem; background: #0f172a; padding: 8px; border-radius: 5px; margin-top: 5px; overflow-x: auto; color: #a7f3d0; max-height: 100px; }
     </style>
 </head>
 <body>
 
     <div class="app-container">
+        <!-- SCHERM 1: START/UNLOCK (Cruciaal voor iPad Safari geluid) -->
         <div id="startScreen" class="screen active start-screen">
-            <h1 style="color: #38bdf8;">Dolphin0x</h1>
-            <p>Klik om de veilige omgeving te starten en rechten uit te delen.</p>
-            <button class="btn-start" onclick="startSysteem()">⚡ Systeem Opstarten</button>
+            <h1 style="color: #38bdf8; font-size: 2.5rem; margin-bottom: 10px;">Dolphin0x OS</h1>
+            <p style="color: #94a3b8; margin-bottom: 30px;">Activeer het systeem om spraakherkenning en de AI-stem te ontgrendelen.</p>
+            <button class="btn-start" onclick="startSysteem()">⚡ Systeem Starten</button>
         </div>
 
+        <!-- SCHERM 2: DE HOOFDOMGEVING -->
         <div id="mainScreen" class="screen">
-            <div class="header">
-                <h2>Dolphin0x</h2>
-                <input type="text" id="espIp" class="esp-input" placeholder="ESP32 IP...">
-                <label style="color: #94a3b8; font-size: 0.9rem;">
-                    <input type="checkbox" id="webToggle"> Live Web
-                </label>
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <div class="sidebar-tabs">
+                    <button id="tabChatsBtn" class="tab-btn active" onclick="switchTab('chats')">💬 Chats</button>
+                    <button id="tabCodesBtn" class="tab-btn" onclick="switchTab('codes')">💾 Code Opslag</button>
+                </div>
+
+                <!-- CHATS TAB -->
+                <div id="tabChats" class="tab-content active">
+                    <button class="btn-new" onclick="maakNieuweChat()">➕ Nieuwe Chat</button>
+                    <div id="chatsList" class="item-list"></div>
+                </div>
+
+                <!-- CODE STORAGE TAB -->
+                <div id="tabCodes" class="tab-content">
+                    <div class="code-form">
+                        <input type="text" id="codeTitel" placeholder="Titel van de code...">
+                        <textarea id="codeInhoud" rows="3" placeholder="Plak hier je code of script..."></textarea>
+                        <button class="btn-new" style="margin:0; padding:8px;" onclick="slaCodeOp()">💾 Opslaan</button>
+                    </div>
+                    <div id="codesList" class="item-list"></div>
+                </div>
             </div>
 
-            <div id="chatBox" class="chat-box">
-                <div class="msg ai">Systeem online. Hoe kan ik je vandaag helpen? (Vul bovenin het IP-adres van je ESP32 in om hardware te besturen).</div>
-            </div>
+            <!-- CHAT INHOUD -->
+            <div class="chat-area">
+                <div class="chat-header">
+                    <h2 id="currentChatTitle">Chat</h2>
+                    <span style="color: #475569; font-size: 0.85rem;">Status: Online</span>
+                </div>
 
-            <div class="input-bar">
-                <button id="micBtn" class="btn btn-mic" onclick="toggleMicrofoon()">🎙️</button>
-                <input type="text" id="userInput" class="text-input" placeholder="Typ of spreek een commando..." onkeypress="if(event.key === 'Enter') stuurBericht()">
-                <button class="btn btn-send" onclick="stuurBericht()">Stuur</button>
+                <div id="chatBox" class="chat-box"></div>
+
+                <!-- Typ-indicator -->
+                <div id="typingIndicator" class="typing-indicator">
+                    <div class="typing-dots">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+
+                <div class="input-bar">
+                    <button id="micBtn" class="btn-icon btn-mic" onclick="toggleMicrofoon()">🎙️</button>
+                    <input type="text" id="userInput" class="text-input" placeholder="Typ of spreek je bericht..." onkeypress="if(event.key === 'Enter') stuurBericht()">
+                    <button class="btn-icon btn-send" onclick="stuurBericht()">Stuur</button>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        const chatBox = document.getElementById('chatBox');
-        let geschiedenis = [
-            { role: "system", content: "Je bent Dolphin0x, een behulpzame AI. Antwoord vlot en persoonlijk. ALS de gebruiker een lamp/led aan wil zetten, antwoord dan leuk en zet EXACT de tekst '[LED_ON]' helemaal aan het einde. Als de lamp uit moet, gebruik '[LED_OFF]'." }
-        ];
+        // State management bewaard in LocalStorage
+        let chats = JSON.parse(localStorage.getItem('d0x_chats')) || [];
+        let savedCodes = JSON.parse(localStorage.getItem('d0x_codes')) || [];
+        let currentChatId = localStorage.getItem('d0x_current_chat_id') || null;
 
-        // Spraaksynthese & Herkenning instellen
         const synth = window.speechSynthesis;
         const SpraakHerkenning = window.SpeechRecognition || window.webkitSpeechRecognition;
         let herkenning = SpraakHerkenning ? new SpraakHerkenning() : null;
 
+        // Spraakherkenning Config
         if (herkenning) {
             herkenning.lang = 'nl-NL';
             herkenning.onstart = () => document.getElementById('micBtn').classList.add('active');
@@ -91,27 +157,103 @@
             };
         }
 
+        // ⚡ START EN UNLOCK AUDIO
         async function startSysteem() {
             try {
-                // Initialiseer Puter en vraag direct toestemming (die kleine popup)
+                // Maak verbinding met Puter
                 await puter.ai.chat("ping");
                 
-                // Haal onzichtbaar de stemmen alvast op
-                synth.getVoices(); 
-                
+                // Activeer een lege audio-stream zodat iPad Safari niet blokkeert
+                const u = new SpeechSynthesisUtterance("");
+                synth.speak(u);
+
                 document.getElementById('startScreen').classList.remove('active');
                 document.getElementById('mainScreen').classList.add('active');
+
+                // Laad de opgeslagen data in de UI
+                if (chats.length === 0) maakNieuweChat();
+                laadChatsUI();
+                laadCodesUI();
+                openChat(currentChatId || chats[0].id);
+
             } catch (err) {
-                alert("Activatie mislukt. Sta de Puter pop-up toe op je iPad!");
+                alert("Puter connectie mislukt. Zorg dat je internet hebt en pop-ups toestaat.");
             }
         }
 
-        function voegBerichtToe(rol, tekst, isSpeciaal = false) {
-            const div = document.createElement('div');
-            div.className = `msg ${rol}`;
-            div.innerText = tekst;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
+        // TAB SCHAKELAAR (CHATS VS CODES)
+        function switchTab(tab) {
+            document.getElementById('tabChatsBtn').classList.toggle('active', tab === 'chats');
+            document.getElementById('tabCodesBtn').classList.toggle('active', tab === 'codes');
+            document.getElementById('tabChats').classList.toggle('active', tab === 'chats');
+            document.getElementById('tabCodes').classList.toggle('active', tab === 'codes');
+        }
+
+        // ================= CHAT LOGIC =================
+
+        function maakNieuweChat() {
+            const nieuwId = 'chat_' + Date.now();
+            const nieuweChat = {
+                id: nieuwId,
+                title: "Nieuwe Chat",
+                history: [{ role: "system", content: "Je bent Dolphin0x, een snelle en slimme AI-assistent. Geef heldere en correcte antwoorden in het Nederlands. Houd het natuurlijk omdat je antwoorden hardop worden voorgelezen." }]
+            };
+            chats.unshift(nieuweChat);
+            saveData();
+            laadChatsUI();
+            openChat(nieuwId);
+        }
+
+        function laadChatsUI() {
+            const list = document.getElementById('chatsList');
+            list.innerHTML = '';
+            chats.forEach(c => {
+                const item = document.createElement('div');
+                item.className = `list-item ${c.id === currentChatId ? 'active' : ''}`;
+                item.onclick = () => openChat(c.id);
+                
+                item.innerHTML = `
+                    <div class="item-text">${c.title}</div>
+                    <button class="btn-del" onclick="event.stopPropagation(); verwijderChat('${c.id}')">🗑️</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function openChat(id) {
+            currentChatId = id;
+            localStorage.setItem('d0x_current_chat_id', id);
+            laadChatsUI();
+            
+            const activeChat = chats.find(c => c.id === id);
+            if (!activeChat) return;
+
+            document.getElementById('currentChatTitle').innerText = activeChat.title;
+            
+            // Bouw chatbox opnieuw op
+            const box = document.getElementById('chatBox');
+            box.innerHTML = '';
+            activeChat.history.forEach(m => {
+                if(m.role !== 'system') {
+                    const div = document.createElement('div');
+                    div.className = `msg ${m.role === 'user' ? 'user' : 'ai'}`;
+                    div.innerText = m.content;
+                    box.appendChild(div);
+                }
+            });
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function verwijderChat(id) {
+            chats = chats.filter(c => c.id !== id);
+            saveData();
+            if (chats.length === 0) {
+                maakNieuweChat();
+            } else if (currentChatId === id) {
+                openChat(chats[0].id);
+            } else {
+                laadChatsUI();
+            }
         }
 
         async function stuurBericht() {
@@ -120,85 +262,151 @@
             if (!tekst) return;
 
             input.value = '';
-            voegBerichtToe('user', tekst);
+            
+            // Push direct een stille audio naar Safari om de speaker open te houden
+            const s = new SpeechSynthesisUtterance("");
+            synth.speak(s);
 
-            let promptVoorAI = tekst;
+            const activeChat = chats.find(c => c.id === currentChatId);
+            if (!activeChat) return;
 
-            // Simpele Web Scraper via DuckDuckGo als de toggle aan staat
-            if (document.getElementById('webToggle').checked && !tekst.toLowerCase().includes('led')) {
-                try {
-                    const proxy = `https://corsproxy.io/?https://html.duckduckgo.com/html/?q=${encodeURIComponent(tekst)}`;
-                    const res = await fetch(proxy);
-                    if (res.ok) {
-                        const html = await res.text();
-                        const doc = new DOMParser().parseFromString(html, 'text/html');
-                        const snippets = Array.from(doc.querySelectorAll('.result__snippet')).slice(0, 2).map(el => el.innerText);
-                        if (snippets.length) promptVoorAI = `[WEB INFO]: ${snippets.join(' | ')}\n\n[VRAAG]: ${tekst}`;
-                    }
-                } catch (e) {
-                    console.log("Web zoeken mislukt, we gaan door zonder web-data.");
-                }
+            // Voeg gebruikersbericht toe aan UI en geschiedenis
+            activeChat.history.push({ role: "user", content: tekst });
+            
+            // Update chat titel automatisch op basis van het eerste bericht
+            if (activeChat.title === "Nieuwe Chat") {
+                activeChat.title = tekst.substring(0, 18) + (tekst.length > 18 ? "..." : "");
             }
 
-            geschiedenis.push({ role: "user", content: promptVoorAI });
+            openChat(currentChatId);
+
+            // Toon de Live Typ Indicator
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'block';
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
 
             try {
-                const antwoord = await puter.ai.chat(geschiedenis, { model: 'openai/gpt-4o-mini' });
+                // Vraag het aan Puter AI
+                const antwoord = await puter.ai.chat(activeChat.history);
                 let aiTekst = typeof antwoord === 'string' ? antwoord : (antwoord?.message?.content || "");
 
-                // ESP32 Hardware Check
-                let actie = null;
-                if (aiTekst.includes('[LED_ON]')) { actie = "on"; aiTekst = aiTekst.replace('[LED_ON]', ''); }
-                if (aiTekst.includes('[LED_OFF]')) { actie = "off"; aiTekst = aiTekst.replace('[LED_OFF]', ''); }
+                // Verberg Typ Indicator
+                indicator.style.display = 'none';
 
-                geschiedenis.push({ role: "assistant", content: aiTekst });
-                voegBerichtToe('ai', aiTekst);
+                activeChat.history.push({ role: "assistant", content: aiTekst });
+                saveData();
+                openChat(currentChatId);
+                
+                // Laat de AI terugpraten
                 praat(aiTekst);
 
-                if (actie) triggerESP32(actie);
-
             } catch (error) {
-                voegBerichtToe('error', `Fout bij AI verbinding: ${error.message}`);
+                indicator.style.display = 'none';
+                const box = document.getElementById('chatBox');
+                box.innerHTML += `<div class="msg ai" style="color:red">Fout bij verbinden: ${error.message}</div>`;
             }
         }
 
-        async function triggerESP32(status) {
-            const ip = document.getElementById('espIp').value.trim();
-            if (!ip) {
-                voegBerichtToe('error', "Geen IP ingevuld! Kon de ESP32 niet bereiken.");
-                return;
-            }
-            try {
-                // Het onzichtbare Wi-Fi signaal
-                await fetch(`http://${ip}/led/${status}`, { mode: 'no-cors' });
-                voegBerichtToe('system', `✅ Signaal gestuurd naar ${ip} (Status: ${status.toUpperCase()})`);
-            } catch (e) {
-                voegBerichtToe('error', "Kon de ESP32 niet bereiken. Zitten jullie op dezelfde Wi-Fi?");
+        // ================= CODE STORAGE LOGIC =================
+
+        function slaCodeOp() {
+            const titelInput = document.getElementById('codeTitel');
+            const inhoudInput = document.getElementById('codeInhoud');
+            
+            const titel = titelInput.value.trim() || "Code Snippet";
+            const inhoud = inhoudInput.value.trim();
+            
+            if(!inhoud) { alert("De code mag niet leeg zijn!"); return; }
+
+            const nieuweCode = {
+                id: 'code_' + Date.now(),
+                title: titel,
+                code: inhoud
+            };
+
+            savedCodes.unshift(nieuweCode);
+            localStorage.setItem('d0x_codes', JSON.stringify(savedCodes));
+            
+            titelInput.value = '';
+            inhoudInput.value = '';
+            laadCodesUI();
+        }
+
+        function laadCodesUI() {
+            const list = document.getElementById('codesList');
+            list.innerHTML = '';
+            savedCodes.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.style.flexDirection = 'column';
+                item.style.alignItems = 'stretch';
+                item.style.cursor = 'default';
+                
+                item.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong style="color:#38bdf8; font-size:0.9rem;">${c.title}</strong>
+                        <div>
+                            <button class="btn-new" style="margin:0; padding:3px 8px; font-size:0.75rem; background:#10b981;" onclick="kopieerCode('${c.id}')">📋 Kopieer</button>
+                            <button class="btn-del" style="margin-left:5px;" onclick="verwijderCode('${c.id}')">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="code-box">${escapeHtml(c.code)}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function kopieerCode(id) {
+            const target = savedCodes.find(c => c.id === id);
+            if(target) {
+                navigator.clipboard.writeText(target.code);
+                alert(`"${target.title}" is gekopieerd naar je klembord!`);
             }
         }
+
+        function verwijderCode(id) {
+            savedCodes = savedCodes.filter(c => c.id !== id);
+            localStorage.setItem('d0x_codes', JSON.stringify(savedCodes));
+            laadCodesUI();
+        }
+
+        // ================= SPRAAK FUNCTIES =================
 
         function praat(tekst) {
-            synth.cancel();
-            let schoon = tekst.replace(/[*#_\[\]]/g, ''); 
-            // Anti-stotter: knip bij punten en uitroeptekens
-            let zinnen = schoon.match(/[^.!?]+[.!?]+/g) || [schoon];
+            if (!synth) return;
+            synth.cancel(); // Stop direct met praten als er nog wat bezig was
+
+            let schoneTekst = tekst.replace(/[*#_\[\]]/g, ''); // Verwijder markdown tekens
+            let zinnen = schoneTekst.match(/[^.!?]+[.!?]+/g) || [schoneTekst];
             
             let stemmen = synth.getVoices();
-            let uniekeStem = stemmen.find(v => v.lang === 'nl-BE') || stemmen.find(v => v.lang === 'nl-NL' && !v.name.includes('Siri')) || stemmen.find(v => v.lang.includes('nl'));
+            let nlStem = stemmen.find(v => v.lang === 'nl-BE') || 
+                       stemmen.find(v => v.lang === 'nl-NL' && !v.name.includes('Siri')) || 
+                       stemmen.find(v => v.lang.includes('nl'));
 
             zinnen.forEach(zin => {
+                if(zin.trim().length === 0) return;
                 let u = new SpeechSynthesisUtterance(zin.trim());
-                if (uniekeStem) u.voice = uniekeStem;
-                u.pitch = 0.85; // Iets donkerder
-                u.rate = 1.05;  // Iets sneller
+                if (nlStem) u.voice = nlStem;
+                u.pitch = 0.95; // Fijne, natuurlijke toon
+                u.rate = 1.05;  // Normaal vlot spreektempo
                 synth.speak(u);
             });
         }
 
         function toggleMicrofoon() {
-            if (!herkenning) { alert("Microfoon niet ondersteund op deze browser."); return; }
+            if (!herkenning) { alert("Spraakherkenning niet ondersteund op deze browser."); return; }
             if (synth.speaking) synth.cancel();
             herkenning.start();
+        }
+
+        // HELPER FUNCTIES
+        function saveData() {
+            localStorage.setItem('d0x_chats', JSON.stringify(chats));
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>
