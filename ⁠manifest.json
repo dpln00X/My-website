@@ -1,0 +1,16 @@
+{
+  "name": "Dolphin0x OS",
+  "short_name": "Dolphin0x",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0b1120",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3063/3063822.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+  }
